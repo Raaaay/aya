@@ -4,7 +4,7 @@ from aya.app import Aya
 app = Aya()
 
 
-@app.route("/index", method=["GET", "POST"])
+@app.route("/index", methods=["GET", "POST"])
 def say_hello():
     print "hello, aya."
 

@@ -18,14 +18,15 @@ class Aya(object):
         server = SimpleServer(host, port, self)
         server.run()
 
-    def route(self, path, method=["GET"]):
+    def route(self, path, methods=["GET"]):
         def wrapper(func):
-            self.router.add_rule(path, func)
+            self.router.add_rule(path, methods, func)
         return wrapper
 
     def __call__(self, environ, start_response):
         path = environ["PATH_INFO"]
-        func = self.router.get_handler(path)
+        method = environ["REQUEST_METHOD"]
+        func = self.router.get_handler(path, method)
         if func:
             func()
         start_response("200 OK", [("location", "http://www.baidu.com")])
