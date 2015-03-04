@@ -5,22 +5,13 @@
 """
 import threading
 import urlparse
-
-
-class HttpCode(object):
-    STAT_MSG_MAP = {
-        200: "OK",
-        404: "NOT FOUND",
-        500: "SERVER ERROR",
-        503: "TIME OUT"
-    }
-
-    @staticmethod
-    def get_status_message(status):
-        return HttpCode.STAT_MSG_MAP.get(status, "NOT FOUND")
+import httplib
 
 
 class Request(threading.local):
+    """
+    Http Request class.
+    """
 
     def __init__(self, environ=None):
         self.environ = environ
@@ -86,6 +77,9 @@ class Request(threading.local):
 
 
 class Response(threading.local):
+    """
+    Http Response class.
+    """
 
     DEFAULT_STATUS = 200
 
@@ -95,16 +89,36 @@ class Response(threading.local):
         self.status = Response.DEFAULT_STATUS
 
     def set_response_body(self, body):
+        """
+        Set the body of this response.
+        :param body: response body, should be a string, or will be cast to a string.
+        """
         self.response_body = str(body)
 
     def set_header(self, header):
+        """
+        Set the header of this response.
+        :param header: should be a dict or a Header.
+        """
         if isinstance(header, dict):
             self.headers.set_data(header)
         elif isinstance(header, Header):
             self.header = header
 
     def set_status(self, status):
+        """
+        Set the response code of this response.
+        :param status: response code, should be a int like 200, 300...
+        """
         self.status = status
+
+    @property
+    def status_line(self):
+        """
+        The status line in response header.
+        :return:The status line of this response, like "404 Not Found"
+        """
+        return " ".join([str(self.status), httplib.responses.get(self.status)])
 
 
 class Header(threading.local):

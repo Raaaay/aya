@@ -6,7 +6,12 @@ app = Aya()
 
 @app.route("/index", methods=["GET", "POST"])
 def say_hello():
-    return 404, "hello, aya!"
+    return 200
+
+
+@app.route("/aya", methods=["GET"])
+def say_hi():
+    return 200, "Aya"
 
 
 if __name__ == "__main__":
