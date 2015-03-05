@@ -4,15 +4,14 @@ from aya.app import Aya
 app = Aya()
 
 
-@app.route("/index", methods=["GET", "POST"])
+@app.route("/", methods=["GET", "POST"])
 def say_hello():
     return 200
 
 
-@app.route("/aya", methods=["GET"])
-def say_hi():
-    return 200, "Aya"
-
+@app.route("/<string:name>/<int:age>/profile")
+def my_profile(name, age):
+    return "my name is %s, and my age is %d, this is my profile." % (name, age)
 
 if __name__ == "__main__":
     app.run("127.0.0.1", 8080)

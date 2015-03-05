@@ -95,15 +95,13 @@ class Response(threading.local):
         """
         self.response_body = str(body)
 
-    def set_header(self, header):
+    def set_header(self, key, value):
         """
-        Set the header of this response.
-        :param header: should be a dict or a Header.
+        Add one header into this response.
+        :param key: key of header.
+        :param value: value of header.
         """
-        if isinstance(header, dict):
-            self.headers.set_data(header)
-        elif isinstance(header, Header):
-            self.header = header
+        self.header.set_header(key, value)
 
     def set_status(self, status):
         """
@@ -122,15 +120,29 @@ class Response(threading.local):
 
 
 class Header(threading.local):
+    """
+    Http header class.
+    """
 
     def __init__(self, data=None):
-        self.data = data
+        self.data = data if isinstance(data, dict) else dict()
 
-    def set_data(self, data):
-        self.data = data
+    def set_header(self, key, value):
+        """
+        Set a header value.
+        :param key: key of header. key should be a string.
+        :param value: value of header. value will be cast to a string.
+        """
+        if not isinstance(key, str):
+            raise TypeError("header key should be a string.")
+        self.data[key] = str(value)
 
     def to_list(self):
-        return [] if not self.data else [(key, value) for (key, value) in self.data.items()]
+        """
+        Return all headers as a list.
+        :return: A list like [(key1, value1), (key2, value2)...]
+        """
+        return [(key, value) for (key, value) in self.data.items()]
 
 
 class Cookie(threading.local):

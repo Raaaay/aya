@@ -47,12 +47,13 @@ class Aya(object):
             self.router.add_rule(path, methods, func)
         return wrapper
 
-    def set_response_headers(self, header):
+    def set_header(self, key, value):
         """
         Set the response headers for this request.
-        :param header: response headers.
+        :param key: response header's key.
+        :param value: response header's value
         """
-        self.response.set_headers(header)
+        self.response.set_header(key, value)
 
     def _handle_request(self, handler, args=None):
         try:
@@ -74,9 +75,9 @@ class Aya(object):
 
     def __call__(self, environ, start_response):
         self.request.set_environ(environ)
-        handler = self.router.get_handler(self.request.request_path, self.request.request_method)
+        handler, args = self.router.get_handler(self.request.request_path, self.request.request_method)
         if handler:
-            self._handle_request(handler)
+            self._handle_request(handler, args)
         else:
             self.response.set_status(404)
             self.response.set_response_body("No request handler found.")
