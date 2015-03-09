@@ -103,6 +103,21 @@ class Response(threading.local):
         """
         self.header.set_header(key, value)
 
+    def set_cookie(self, key, value):
+        """
+        Set Cookie for response.
+        :param key: cookie's key
+        :param value: cookie's value
+        """
+        self.header.set_cookie(key, value)
+
+    def set_cookie_info(self, **kwargs):
+        """
+        Set cookie info for response.
+        :param kwargs: cookie's info, include domain, path, and expires.
+        """
+        self.header.set_cookie_info(**kwargs)
+
     def set_status(self, status):
         """
         Set the response code of this response.
@@ -126,6 +141,7 @@ class Header(threading.local):
 
     def __init__(self, data=None):
         self.data = data if isinstance(data, dict) else dict()
+        self.cookie = Cookie()
 
     def set_header(self, key, value):
         """
@@ -137,13 +153,87 @@ class Header(threading.local):
             raise TypeError("header key should be a string.")
         self.data[key] = str(value)
 
+    def set_cookie(self, key, value):
+        """
+        Set Cookie for response.
+        :param key: cookie's key
+        :param value: cookie's value
+        """
+        self.cookie.set_cookie(key, value)
+
+    def set_cookie_info(self, **kwargs):
+        """
+        Set cookie info for response.
+        :param kwargs: cookie's info, include domain, path, and expires.
+        """
+        if "domain" in kwargs:
+            self.cookie.set_domain(kwargs["domain"])
+        if "path" in kwargs:
+            self.cookie.set_path(kwargs["path"])
+        if "expires" in kwargs:
+            self.cookie.set_expires(kwargs["expires"])
+
     def to_list(self):
         """
         Return all headers as a list.
         :return: A list like [(key1, value1), (key2, value2)...]
         """
+        if self.cookie.data:
+            self.data["Set-Cookie"] = str(self.cookie)
         return [(key, value) for (key, value) in self.data.items()]
 
 
 class Cookie(threading.local):
-    pass
+    """
+    Http Cookie class.
+    """
+    def __init__(self, path=None, domain=None, expires=None):
+        self.data = dict()
+        self.path = path
+        self.domain = domain
+        self.expires = expires
+
+    def set_cookie(self, key, value):
+        """
+        Set one cookie.
+        :param key: key of this cookie
+        :param value: value of this cookie
+        """
+        assert(isinstance(key, str))
+        assert(isinstance(value, str))
+        self.data[key] = value
+
+    def set_expires(self, expires):
+        """
+        Set the expire time of this cookie.
+        :param expires: expire time of this cookie.
+        """
+        self.expires = expires
+
+    def set_path(self, path):
+        """
+        Set the path of this cookie.
+        :param path: path of this cookie.
+        """
+        self.path = path
+
+    def set_domain(self, domain):
+        """
+        Set domain for this cookie.
+        :param domain: domain of this cookie
+        """
+        self.domain = domain
+
+    def __str__(self):
+        if not self.data:
+            return ""
+        else:
+            cookies_str = ";".join([key + "=" + value for (key, value) in self.data.items()])
+            if self.path:
+                cookies_str += ";path=" + self.path
+            if self.domain:
+                cookies_str += ";domain=" + self.domain
+            if self.expires:
+                cookies_str += ";expires=" + self.expires
+            cookies_str += ";"
+            return cookies_str

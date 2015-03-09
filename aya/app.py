@@ -5,7 +5,7 @@
 """
 from .server import SimpleServer
 from .router import Router
-from .http import Request, Response
+from .http import Request, Response, Cookie
 
 
 class Aya(object):
@@ -54,6 +54,21 @@ class Aya(object):
         :param value: response header's value
         """
         self.response.set_header(key, value)
+
+    def set_cookie(self, key, value):
+        """
+        Set Cookie for response.
+        :param key: Cookie's key
+        :param value: Cookie's value
+        """
+        self.response.set_cookie(key, value)
+
+    def set_response_cookie_info(self, **kwargs):
+        """
+        Set cookie info for response.
+        :param kwargs: cookie's info, include domain, path, and expires.
+        """
+        self.response.set_cookie_info(**kwargs)
 
     def _handle_request(self, handler, args=None):
         try:
