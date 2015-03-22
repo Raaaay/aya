@@ -16,4 +16,5 @@ def my_profile(name, age):
     return "my name is %s, and my age is %d, this is my profile." % (name, age)
 
 if __name__ == "__main__":
+    app.set_static_root("E:/workspace/aya/aya")
     app.run("127.0.0.1", 8080)

@@ -15,6 +15,7 @@ class Request(threading.local):
 
     def __init__(self, environ=None):
         self.environ = environ
+        self.request_body = None
         if environ:
             self.GET = self.__init_get()
             self.POST = self.__init_post()
@@ -36,9 +37,9 @@ class Request(threading.local):
             content_length = int(self.environ.get("CONTENT_LENGTH", 0))
         except ValueError:
             content_length = 0
-        request_body = self.environ["wsgi.input"].read(content_length)
-        if request_body:
-            return self.__parse_query(request_body)
+        self.request_body = self.environ["wsgi.input"].read(content_length)
+        if self.request_body:
+            return self.__parse_query(self.request_body)
         return dict()
 
     def set_environ(self, environ):
@@ -49,6 +50,13 @@ class Request(threading.local):
         self.environ = environ
         self.__init_get()
         self.__init_post()
+
+    def get_body(self):
+        """
+        Get the raw request body of this request.
+        :return: request body as string or None
+        """
+        return self.request_body
 
     @property
     def request_path(self):
@@ -102,6 +110,13 @@ class Response(threading.local):
         :param value: value of header.
         """
         self.header.set_header(key, value)
+
+    def set_content_type(self, content_type):
+        """
+        Set the content type of response.
+        :param content_type: content type
+        """
+        self.set_header("Content-Type", content_type)
 
     def set_cookie(self, key, value):
         """
